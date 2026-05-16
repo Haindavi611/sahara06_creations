@@ -61,8 +61,8 @@ body {
   height: 60px;
   border-radius: 50%;
   object-fit: cover;
-  #border: 3px solid var(--purple-light);
-  #box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15);
+  /* border: 3px solid var(--purple-light); */
+  /* box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15); */
 }
 
 .brand-text h1 {

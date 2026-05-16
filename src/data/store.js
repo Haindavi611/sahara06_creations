@@ -203,11 +203,18 @@ export function loadData(key, defaults) {
   try {
     const stored = localStorage.getItem(key);
     if (stored) return JSON.parse(stored);
-  } catch (_) {}
+  } catch (error) {
+    console.error(`Unable to load ${key}`, error);
+  }
   return defaults;
 }
 export function saveData(key, data) {
   try {
     localStorage.setItem(key, JSON.stringify(data));
-  } catch (_) {}
+    window.dispatchEvent(new CustomEvent("sahara06:data-change", { detail: { key } }));
+    return true;
+  } catch (error) {
+    console.error(`Unable to save ${key}`, error);
+    return false;
+  }
 }

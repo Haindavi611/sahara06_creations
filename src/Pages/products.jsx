@@ -246,7 +246,7 @@ function Lightbox({ product, onClose }) {
                     aria-label={`View image ${i + 1}`}
                   >
                     {" "}
-                    <img src={img} alt={thumb - `${i}`} />{" "}
+                    <img src={img} alt={`${product.name} thumbnail ${i + 1}`} />{" "}
                   </button>
                 ))}{" "}
               </div>
@@ -293,6 +293,7 @@ export default function Products() {
     const cat = searchParams.get("category");
     const cols = loadData(KEYS.collections, defaultCollections);
     if (cat && cols.some((c) => c.title === cat)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveFilter(cat);
     } else if (!cat) {
       setActiveFilter("All");

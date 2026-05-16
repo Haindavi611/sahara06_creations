@@ -50,18 +50,27 @@ const defaultReviews = [
   },
 ];
 const STORAGE_KEY = "sahara06_reviews";
-const CARDS_PER_PAGE = 3;
+function getCardsPerPage() {
+  if (typeof window === "undefined") return 3;
+  if (window.matchMedia("(max-width: 768px)").matches) return 1;
+  if (window.matchMedia("(max-width: 1024px)").matches) return 2;
+  return 3;
+}
 function loadReviews() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) return JSON.parse(stored);
-  } catch (_) {}
+  } catch (error) {
+    console.error("Unable to load reviews", error);
+  }
   return defaultReviews;
 }
 function saveReviews(reviews) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(reviews));
-  } catch (_) {}
+  } catch (error) {
+    console.error("Unable to save reviews", error);
+  }
 }
 function StarDisplay({ rating }) {
   return (
@@ -77,6 +86,7 @@ function getInitial(name) {
 export default function Testimonials() {
   const [reviews, setReviews] = useState(loadReviews);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [cardsPerPage, setCardsPerPage] = useState(getCardsPerPage);
   const [form, setForm] = useState({
     name: "",
     location: "",
@@ -90,21 +100,33 @@ export default function Testimonials() {
   useEffect(() => {
     saveReviews(reviews);
   }, [reviews]);
-  const totalPages = Math.ceil(reviews.length / CARDS_PER_PAGE);
-  const visibleReviews = reviews.slice(
-    currentIndex,
-    currentIndex + CARDS_PER_PAGE,
+  useEffect(() => {
+    const handleResize = () => {
+      setCardsPerPage(getCardsPerPage());
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const totalPages = Math.ceil(reviews.length / cardsPerPage);
+  const safeCurrentIndex = Math.min(
+    Math.floor(currentIndex / cardsPerPage) * cardsPerPage,
+    Math.max(0, (totalPages - 1) * cardsPerPage),
   );
-  const canPrev = currentIndex > 0;
-  const canNext = currentIndex + CARDS_PER_PAGE < reviews.length;
+  const visibleReviews = reviews.slice(
+    safeCurrentIndex,
+    safeCurrentIndex + cardsPerPage,
+  );
+  const canPrev = safeCurrentIndex > 0;
+  const canNext = safeCurrentIndex + cardsPerPage < reviews.length;
   const handlePrev = () => {
-    if (canPrev) setCurrentIndex((i) => i - CARDS_PER_PAGE);
+    if (canPrev) setCurrentIndex(Math.max(0, safeCurrentIndex - cardsPerPage));
   };
   const handleNext = () => {
-    if (canNext) setCurrentIndex((i) => i + CARDS_PER_PAGE);
+    if (canNext) setCurrentIndex(safeCurrentIndex + cardsPerPage);
   };
   const handleDot = (pageIndex) => {
-    setCurrentIndex(pageIndex * CARDS_PER_PAGE);
+    setCurrentIndex(pageIndex * cardsPerPage);
   };
   const validate = () => {
     const e = {};
@@ -140,7 +162,7 @@ export default function Testimonials() {
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 4000);
   };
-  const currentPage = Math.floor(currentIndex / CARDS_PER_PAGE);
+  const currentPage = Math.floor(safeCurrentIndex / cardsPerPage);
   return (
     <section className="testimonials" id="reviews">
       {" "}

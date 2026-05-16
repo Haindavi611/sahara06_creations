@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FaBars, FaShoppingBag, FaTimes } from "react-icons/fa";
+import logo from "../assets/logo.png";
 export default function Header() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -19,7 +20,7 @@ export default function Header() {
       {" "}
       <Link to="/" className="brand">
         {" "}
-        <img src="src\assets\logo.png" alt="Sahara06 Creations Logo" />{" "}
+        <img src={logo} alt="Sahara06 Creations Logo" />{" "}
         <div className="brand-text">
           {" "}
           <h1>Sahara06_Creations</h1> <p>✨ Customized with love</p>{" "}

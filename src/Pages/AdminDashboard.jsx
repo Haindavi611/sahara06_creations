@@ -483,6 +483,7 @@ function CollectionsManager() {
   const [editing, setEditing] = useState(null);
   const [isNew, setIsNew] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [saveError, setSaveError] = useState("");
   // Count products per collection
   const allProducts = loadData(KEYS.products, defaultProducts);
   const productCountByCategory = allProducts.reduce((acc, p) => {
@@ -493,14 +494,24 @@ function CollectionsManager() {
     return acc;
   }, {});
   const persist = (data) => {
+    const saved = saveData(KEYS.collections, data);
+    if (!saved) {
+      setSaveError(
+        "Collection could not be saved. Your browser storage may be full, especially if many product images were uploaded.",
+      );
+      return false;
+    }
+    setSaveError("");
     setCollections(data);
-    saveData(KEYS.collections, data);
+    return true;
   };
   const startAdd = () => {
+    setSaveError("");
     setEditing(emptyCollection());
     setIsNew(true);
   };
   const startEdit = (c) => {
+    setSaveError("");
     setEditing({ ...c });
     setIsNew(false);
   };
@@ -510,9 +521,10 @@ function CollectionsManager() {
   };
   const handleSave = () => {
     if (!editing.title.trim()) return;
-    if (isNew) persist([...collections, editing]);
-    else persist(collections.map((c) => (c.id === editing.id ? editing : c)));
-    cancelEdit();
+    const nextCollections = isNew
+      ? [...collections, editing]
+      : collections.map((c) => (c.id === editing.id ? editing : c));
+    if (persist(nextCollections)) cancelEdit();
   };
   const handleDelete = () => {
     persist(collections.filter((c) => c.id !== deleteId));
@@ -592,6 +604,7 @@ function CollectionsManager() {
             </div>{" "}
             <div className="admin-modal-body">
               {" "}
+              {saveError && <div className="admin-error">{saveError}</div>}{" "}
               <div className="admin-form-grid">
                 {" "}
                 <div className="admin-field">
